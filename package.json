@@ -1,0 +1,27 @@
+{
+  "name": "node-dir-tree",
+  "version": "0.0.1",
+  "description": "Represent your directory structure in JSON format",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EltonCarreiro/node-dir-tree.git"
+  },
+  "keywords": [
+    "dir",
+    "directory",
+    "json"
+  ],
+  "author": "Elton Carreiro",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EltonCarreiro/node-dir-tree/issues"
+  },
+  "homepage": "https://github.com/EltonCarreiro/node-dir-tree#readme",
+  "dependencies": {
+    "async": "^2.6.0"
+  }
+}
