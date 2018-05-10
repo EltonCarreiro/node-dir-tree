@@ -6,7 +6,26 @@ node-dir-tree recursively scans your directory generating a JSON file which repr
 * file hash - The hash is based on the file's content and name (extension included);
 * directory hash - The hash is based on all the child hashes (i.e. files and directories it contains), and it's name.
 
+Usage:
+
+Install
+
+```bash
+$ npm i node-dir-tree --save
+```
+
+Require and just pass the directory
+
+```javascript
+const dirtree = require('node-dir-tree')
+
+dirtree('./exfolder')
+  .then((tree) => console.log(JSON.stringify(tree)))
+  .catch((err) => console.error(err))
+```
+
 Example:
+
 
 For a folder structure like below:
 ```
