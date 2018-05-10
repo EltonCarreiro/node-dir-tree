@@ -8,7 +8,7 @@ const TYPES = {
   DIR: 'dir'
 }
 
-function generateObj(src, root) {
+function generateFileObj(src, root) {
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash('md5');
     const rs = fs.createReadStream(src);
@@ -27,24 +27,39 @@ function generateObj(src, root) {
   })
 }
 
+function generateDirObj(src, root, children) {
+  const hash = crypto.createHash('md5')
+  const name = path.basename(src);
+  children.map((c) => hash.update(c.hash))
+  hash.update(name)
+  const obj = {
+    name: name,
+    relativePath: path.relative(root, src),
+    path: src,
+    type: TYPES.DIR,
+    hash: hash.digest('hex'),
+    children: children
+  }
+
+  obj.relativePath = obj.relativePath.length ? obj.relativePath : '.'
+  return obj
+}
+
 generateTree = function(src, root) {
   return new Promise((resolve, reject) => {
-    let obj = {};
     const children = []
     root = root || src
     src = path.resolve(src)
     const stat = fs.statSync(src)
 
     if (!stat.isDirectory())
-      return generateObj(src, root).then((o) => resolve(o)).catch(reject)
+      return generateFileObj(src, root).then((o) => resolve(o)).catch(reject)
     
-    const hash = crypto.createHash('md5')
     const tasks = fs.readdirSync(src).map(f => {
       const _path = path.resolve(src, f)
       return function(cb) {
         generateTree(_path, root).then((o) => {
           children.push(o);
-          hash.update(o.hash)
           cb(null)
         }).catch(cb)
       }
@@ -54,15 +69,7 @@ generateTree = function(src, root) {
       if(err)
         reject(err)
       else {
-        obj.name = path.basename(src),
-        obj.relativePath = path.relative(root, src),
-        obj.relativePath = obj.relativePath.length ? obj.relativePath : '.'
-        obj.path = src,
-        obj.type = TYPES.DIR,
-        hash.update(obj.name)
-        obj.hash = hash.digest('hex')
-        obj.children = children
-        resolve(obj)
+        resolve(generateDirObj(src, root, children))
       }
     })
   })
