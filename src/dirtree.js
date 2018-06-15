@@ -9,7 +9,6 @@ const TYPES = {
 }
 
 const isDir = (a) => a.type === TYPES.DIR
-const isFile = (a) => a.type === TYPES.FILE
 
 function generateFileObj(src, root, stat) {
   return new Promise((resolve, reject) => {
@@ -124,7 +123,7 @@ function diff(first, second) {
     return generateDiffObj(first, second)
 
   if(first.hash === second.hash)
-    return {}
+    return []
   
   if(isDir(first) && isDir(second)) {
     firstChildren = sortChildren(first.children)
@@ -136,7 +135,10 @@ function diff(first, second) {
       fillChildrenDiff(firstChildren, secondChildren.length - firstChildren.length)
     }
 
-    return firstChildren.map((f, idx) => diff(f, secondChildren[idx]))
+    return firstChildren
+      .map((f, idx) => diff(f, secondChildren[idx]))
+      // Just to remove equal objects
+      .filter(r => r.length === undefined)
   } else {
     return generateDiffObj(first, second)
   }
