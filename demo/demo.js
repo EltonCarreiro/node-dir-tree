@@ -1,5 +1,14 @@
 const dirtree = require('../index')
 
-dirtree('./exfolder')
-  .then((tree) => console.log(JSON.stringify(tree)))
-  .catch((err) => console.error(err))
+async function a() {
+  return await Promise.all([
+    dirtree.generateTree('./demo/exfolder'),
+    dirtree.generateTree('./demo/exfolder2')
+  ])
+}
+
+a()
+  .then(trees => {
+    var diff = JSON.stringify(dirtree.diff(trees[0], trees[1]))
+    console.log(diff)
+  })
