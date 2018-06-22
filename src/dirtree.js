@@ -144,12 +144,40 @@ function diff(first, second) {
   }
 }
 
-function patch(src, diff) {
+function navigate(obj, propPath) {
+  if(!propPath || !obj)
+    return null
 
+    if(obj.path === propPath)
+    return obj
+  
+  if(propPath.indexOf(obj.path) === -1)
+    return null;
+
+  let _idx = obj.path.split(path.sep).length + 1
+  curr = propPath.split(path.sep).slice(0, _idx).join(path.sep)
+  let ref = obj.children.map((c) => navigate(c, propPath)).filter(c => c)
+  return ref.length ? ref[0] : null
+}
+
+function patch(src, diffs) {
+  if (!src)
+    return src
+  
+  let out = JSON.parse(JSON.stringify(src))
+  if (!diffs || !diffs.length)
+    return out
+
+  diffs.map((diff) => {
+    
+  })
+
+  return out
 }
 
 module.exports = {
-  generateTree: generateTree,
-  diff: diff,
-  patch: patch
+  generateTree,
+  diff,
+  patch,
+  navigate
 }
