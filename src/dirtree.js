@@ -54,16 +54,6 @@ function fillChildrenDiff(arr, count) {
     arr.push(null)
 }
 
-/*
-  {
-    changed: [
-      {
-        from:
-      }
-    ]
-  }
-*/
-
 function generateDiffObj(first, second) {
   let filePath = first === null ? second.path : first.path
   return { path: filePath, old: first, new: second }
@@ -119,6 +109,10 @@ generateTree = function(src, root) {
 }
 
 function diff(first, second) {
+  // All JSON parse/stringify must be analyzed to be replaced in the future
+  first = JSON.parse(JSON.stringify(first))
+  second = JSON.parse(JSON.stringify(second))
+
   if(first === null || second === null)
     return generateDiffObj(first, second)
 
@@ -144,7 +138,7 @@ function diff(first, second) {
   }
 }
 
-function navigate(obj, propPath) {
+function navigate(obj, propPath, returnNearest) {
   if(!propPath || !obj)
     return null
 
@@ -157,7 +151,15 @@ function navigate(obj, propPath) {
   let _idx = obj.path.split(path.sep).length + 1
   curr = propPath.split(path.sep).slice(0, _idx).join(path.sep)
   let ref = obj.children.map((c) => navigate(c, propPath)).filter(c => c)
-  return ref.length ? ref[0] : null
+  if(ref.length)
+    return ref[0]
+    
+  if(!returnNearest)
+    return null
+
+  let pathArr = propPath.split(path.sep).slice(0, -1)
+  if (pathArr.length > 0)
+    return navigate(obj, pathArr.join(path.sep), true)
 }
 
 function patch(src, diffs) {
@@ -169,7 +171,21 @@ function patch(src, diffs) {
     return out
 
   diffs.map((diff) => {
-    
+    let ref = navigate(out, diff.path, true)
+    if(!isDir(ref))
+      ref = navigate(out, diff.path.split(path.sep).slice(0, -1).join(path.sep), true)
+    if(diff.old === null) {
+      ref.children.push(diff.new)
+    } else {
+      // check if reference really exists
+      let idx = ref.children.findIndex(c => {
+        return c.path === diff.new.path
+      })
+      if (diff.new === null)
+        ref.children.splice(idx, 1)
+      else
+        ref.children[idx] = diff.new
+    }
   })
 
   return out
